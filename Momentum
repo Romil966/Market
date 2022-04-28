@@ -1,0 +1,33 @@
+import pandas as pd
+from nsepy import get_history
+from datetime import date
+
+path = r'C:\Users\romil.kikani\OneDrive - Aditya Birla Group\Desktop\list.csv'
+df = pd.read_csv(path)
+df = df.drop(columns=['Company Name','Industry','Series','ISIN Code'])
+names = df['Symbol'].values.tolist()
+old_price = []
+new_price = []
+old_date = date(2021,4,26)
+new_date = date(2022,4,26)
+def price(name,date):
+    return get_history(symbol=name,start=date,end=date).iat[0,7]
+for name in names:
+    try:
+        old_price.append(price(name,old_date))
+        print(name)
+    except:
+        old_price.append(None)
+        print("error")
+for name in names:
+    try:
+        new_price.append(price(name,new_date))
+        print(name)
+    except:
+        new_price.append(None)
+        print("error")
+df = pd.DataFrame({'Symbol':names,'Old':old_price,'New':new_price})
+df['%YOY'] = (df['New']-df['Old'])/df['Old']*100
+df = df.dropna()
+df=df.sort_values(by=['%YOY'],ascending=False)
+df.head(50)
